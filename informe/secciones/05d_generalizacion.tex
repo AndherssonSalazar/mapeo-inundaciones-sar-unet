@@ -1,0 +1,85 @@
+% =====================================================================
+% V-D. Generalización geográfica: Bolivia y Lima  (E4)
+% =====================================================================
+\subsection{Generalización geográfica: Bolivia y Lima}
+\label{sec:generalizacion}
+
+Evaluamos el mismo modelo, sin ningún ajuste, en dos eventos que no vio
+(Tabla~\ref{tab:regiones}, Fig.~\ref{fig:brecha}). Definimos la brecha como la caída relativa
+del IoU respecto a test, $(\mathrm{IoU}_{\text{test}}-\mathrm{IoU}_{\text{región}})/
+\mathrm{IoU}_{\text{test}}$.
+
+\begin{table}[t]
+\centering
+\caption{Generalización a eventos no vistos (U-Net: 3 semillas).}
+\label{tab:regiones}
+\begin{tabular}{lccc}
+\toprule
+Región & U-Net IoU & Otsu IoU & Brecha vs.\ test \\
+\midrule
+Test (referencia) & $0.669\pm0.003$ & 0.554 & --- \\
+Bolivia           & $0.663\pm0.026$ & 0.718 & 0.8\,\% \\
+Lima              & $0.003$         & 0.011 & 99.5\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{f8_brecha_regiones.png}
+\caption{IoU por región: test, Bolivia y Lima, frente a Otsu.}
+\label{fig:brecha}
+\end{figure}
+
+\textbf{Bolivia: generaliza.} La brecha es menor que la variación entre semillas. La red es aquí
+más conservadora que Otsu (precisión 0.883, omisión 0.272), y Otsu la supera porque Bolivia es
+un caso favorable para un umbral: grandes extensiones de agua calma y oscura en una llanura de
+inundación.
+
+\textbf{Lima: colapsa.} El IoU cae prácticamente a cero, y también el de Otsu: el problema no es
+la red, sino la señal. La Tabla~\ref{tab:medianas} lo muestra: en Lima, los píxeles que la
+etiqueta llama inundados tienen la \emph{misma} retrodispersión que los no inundados (diferencia
+$<1$\,dB), mientras que en train el agua es 5--7\,dB más oscura que el fondo. Ningún modelo que
+mire una sola imagen puede separar dos clases con la misma distribución.
+
+\begin{table}[t]
+\centering
+\caption{Medianas de retrodispersión (dB) por clase.}
+\label{tab:medianas}
+\begin{tabular}{llcc}
+\toprule
+Conjunto & Clase & VV & VH \\
+\midrule
+\multirow{2}{*}{Train} & agua     & $-14.92$ & $-23.00$ \\
+                       & no agua  & $-9.58$  & $-16.03$ \\
+\midrule
+\multirow{2}{*}{Lima (17/03)} & inundado    & $-10.79$ & $-18.64$ \\
+                              & no inundado & $-10.14$ & $-17.77$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Para entender por qué, descargamos dos escenas más de la misma órbita: antes (05/03) y después
+(29/03) del evento. En la zona inundada, la mediana de VV pasa de $-9.63$ a $-8.75$ y vuelve a
+$-9.63$\,dB, y la de VH de $-17.12$ a $-16.75$ y luego a $-17.37$\,dB, mientras una zona de
+control permanece estable. Es decir, el día del evento la zona inundada se \emph{aclaró} en lugar
+de oscurecerse. Con esto planteamos las siguientes hipótesis:
+\begin{itemize}
+  \item \textbf{H1 -- La etiqueta no describe lo que vio el radar.} La capa EMSN038 es la máxima
+        extensión potencial, delineada con imágenes ópticas de días posteriores. Parte del área
+        etiquetada pudo no tener agua visible a las 10:38 UTC del 17/03, o tener solo lodo ya
+        depositado.
+  \item \textbf{H2 -- Doble rebote y lodo saturado en zona urbana.} Entre edificaciones, el agua
+        forma reflectores de esquina que \emph{aumentan} la señal~\cite{zhao2022urbanaware}, y
+        el barro húmedo y los escombros de un huaico son rugosos, no especulares. Es consistente
+        con el aclaramiento medido.
+  \item \textbf{H3 -- Agua turbulenta en cauces angostos.} El flujo del huaico es rugoso, y los
+        brazos inundados miden pocas decenas de metros: apenas unos píxeles de 10\,m, dominados
+        por el ruido \emph{speckle}.
+\end{itemize}
+H2 se verifica de forma directa en la Sección~\ref{sec:fallos}. Una cuarta hipótesis, que la
+etiqueta tratara el agua permanente de forma distinta a Sen1Floods11, se probó con JRC y se
+descartó (Sección~\ref{sec:fallos}). Por todo esto reportamos Bolivia como el resultado
+cuantitativo de generalización y Lima como un caso negativo diagnosticado. Lima muestra un
+límite físico de la detección con intensidad de una sola fecha, más que un defecto del
+entrenamiento.

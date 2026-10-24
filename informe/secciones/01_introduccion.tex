@@ -1,0 +1,38 @@
+% =====================================================================
+% I. Introducción  (~0.5 páginas)
+% =====================================================================
+\section{Introducción}
+\label{sec:introduccion}
+
+Las inundaciones están entre los desastres naturales que afectan a más personas, y su respuesta
+depende de saber \emph{dónde} está el agua en las primeras horas. Las imágenes ópticas, las más
+fáciles de interpretar, suelen fallar justo entonces: el evento ocurre bajo nubes. El radar de
+apertura sintética (SAR) de Sentinel-1 no tiene esa limitación, pues ilumina la escena con
+microondas de día y de noche y atraviesa la nubosidad. Su principio físico para detectar agua es
+simple: una superficie de agua calma refleja el pulso de forma especular, lejos del sensor, y
+aparece oscura; el suelo rugoso y la vegetación retrodispersan energía y aparecen más claros.
+
+Ese principio tiene excepciones que importan en el Perú. Durante el Niño Costero de marzo de
+2017, los desbordes y huaicos de los ríos Rímac y Chillón inundaron zonas urbanas de Lima con
+agua turbulenta cargada de lodo, entre edificaciones y laderas empinadas: precisamente las
+condiciones en que el agua deja de verse oscura en el SAR. Un modelo entrenado con eventos de
+otros continentes, ¿sirve en ese escenario?
+
+Este trabajo entrena una U-Net~\cite{ronneberger2015unet} implementada desde cero sobre el
+conjunto Sen1Floods11~\cite{bonafilia2020sen1floods11} y la somete a un protocolo experimental
+con tres semillas por configuración. Las contribuciones son:
+\begin{enumerate}
+  \item \textbf{Modelo base (E1):} U-Net propia en PyTorch con entrada VV y VH, sin librerías de
+        segmentación, que supera al umbral de Otsu en test (IoU 0.669 frente a 0.554).
+  \item \textbf{Ablaciones (E2):} la pérdida combinada BCE + Dice es la mejor; quitar las
+        conexiones de salto daña los ríos angostos; las etiquetas débiles no mejoran al modelo
+        entrenado solo con etiquetas a mano.
+  \item \textbf{Evaluación en distribución (E3)} con matriz de confusión y análisis por evento.
+  \item \textbf{Generalización geográfica (E4):} el modelo se mantiene en Bolivia (brecha de
+        0.8\,\%) pero colapsa en Lima (IoU 0.003); diagnosticamos por qué con datos
+        multitemporales.
+  \item \textbf{Análisis de fallos (E5):} cuatro tipos de fallo del SAR confirmados con una prueba
+        cuantitativa cada uno, y una hipótesis descartada.
+  \item \textbf{Fusión con Sentinel-2 (E6):} añadir seis bandas ópticas sube el IoU de test en
+        $+0.185$, con matices sobre cómo se construyeron las etiquetas.
+\end{enumerate}

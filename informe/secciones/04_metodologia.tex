@@ -1,0 +1,53 @@
+% =====================================================================
+% IV. Metodología  (~1 página)
+% =====================================================================
+\section{Metodología}
+\label{sec:metodologia}
+
+\subsection{Arquitectura (E1)}
+Implementamos la U-Net~\cite{ronneberger2015unet} en PyTorch sin librerías de segmentación. El
+codificador tiene cuatro niveles; cada uno aplica un bloque \emph{doble convolución}
+(conv $3\times3$ -- BatchNorm -- ReLU, dos veces) y un \emph{max pooling} de $2\times2$. Los
+canales se duplican en cada nivel ($32\to64\to128\to256$, con 512 en el cuello de botella). El
+decodificador sube la resolución con convoluciones transpuestas y concatena el mapa del mismo
+nivel del codificador (conexión de salto) antes de otro bloque doble. Una convolución $1\times1$
+produce un logit por píxel. A diferencia del original, usamos \emph{padding} para que la salida
+tenga el tamaño de la entrada, y BatchNorm. El modelo tiene 7.76\,M de parámetros y un campo
+receptivo efectivo, medido con gradientes, de 188 píxeles ($\approx$1.9\,km). La entrada son los
+dos canales VV y VH; en el bono (E6) solo cambia el número de canales de entrada.
+
+\subsection{Funciones de pérdida}
+Sea $p_i=\sigma(z_i)$ la probabilidad de agua del píxel $i$ y $\Omega$ el conjunto de píxeles
+válidos ($y_i\neq-1$). Comparamos:
+\begin{align}
+\mathcal{L}_{\mathrm{BCE}} &= -\tfrac{1}{|\Omega|}\textstyle\sum_{i\in\Omega}
+  \big[y_i\log p_i+(1-y_i)\log(1-p_i)\big],\\
+\mathcal{L}_{\mathrm{Dice}} &= 1-\frac{2\sum_{\Omega}p_iy_i+\epsilon}
+  {\sum_{\Omega}p_i+\sum_{\Omega}y_i+\epsilon},\\
+\mathcal{L}_{\mathrm{comb}} &= 0.5\,\mathcal{L}_{\mathrm{BCE}}+0.5\,\mathcal{L}_{\mathrm{Dice}}.
+\end{align}
+La BCE promedia por píxel y, con 9.4\,\% de agua, la dominan los píxeles de fondo. El Dice mide
+el solapamiento de la clase agua, no depende de los verdaderos negativos y está ligado al F1.
+Lo calculamos sobre todo el lote para que los recortes sin agua no lo vuelvan inestable.
+Verificamos que las tres pérdidas valen $\approx$0 con una predicción perfecta y que el gradiente
+en los píxeles $-1$ es exactamente cero.
+
+\subsection{Métricas}
+Reportamos para la clase agua IoU, F1, precisión y \emph{recall}, junto con la omisión
+($1-$recall, agua no detectada) y la comisión ($1-$precisión, falsa alarma). Los conteos VP, FP,
+FN y VN se \emph{suman} sobre todos los recortes de una partición antes de calcular las
+métricas. Así cada píxel pesa lo mismo y los recortes sin agua no producen divisiones $0/0$. La
+línea base es el umbral de Otsu del conjunto, evaluado con la misma máscara de píxeles válidos.
+
+\subsection{Entrenamiento y protocolo experimental}
+Optimizamos con AdamW (tasa $10^{-3}$, decaimiento de pesos $10^{-4}$) y lotes de 8, con 3
+épocas de calentamiento lineal seguidas de un decaimiento coseno, y precisión mixta. Todas las
+variantes tienen el mismo presupuesto: 60 épocas como máximo y parada temprana con paciencia 15
+sobre el IoU de valid. Guardamos el modelo de la mejor época.
+
+Cada configuración se entrena con \textbf{tres semillas} (42, 7 y 123), que cambian la
+inicialización, el orden de los lotes y los aumentos, y se reporta media $\pm$ desviación. Una
+diferencia se considera real solo si supera la variación entre semillas. Las variantes se
+comparan \emph{únicamente en valid}; test se evalúa una sola vez con el modelo elegido y un
+umbral de 0.5 fijado de antemano. Las corridas se ejecutaron en GPU T4 (Colab y Kaggle),
+lanzando un proceso independiente por GPU cuando había dos disponibles.

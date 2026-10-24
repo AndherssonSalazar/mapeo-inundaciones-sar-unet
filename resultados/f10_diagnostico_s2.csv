@@ -1,0 +1,5 @@
+particion,px_etiquetados,% S2 inválido,% visible brillante (posible nube)
+train,57303407,0.02,0.29
+valid,20294725,0.0,0.05
+test,20517367,0.24,0.1
+bolivia,2867815,0.0,0.0

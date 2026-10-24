@@ -1,0 +1,45 @@
+% =====================================================================
+% V-B. Ablación (a): etiquetas débiles  (E2a)
+% Fuente: resultados/f6a_ablacion_resumen.csv
+% =====================================================================
+
+\subsection{Ablación (a): etiquetas débiles}
+\label{sec:ablacion_debiles}
+
+Con la pérdida combinada comparamos cuatro formas de usar los recortes débiles
+(Tabla~\ref{tab:ablacion_a}). \emph{Solo dorados} es el modelo de la sección anterior.
+\emph{Solo débiles} entrena únicamente con etiquetas de Otsu. \emph{Mezcla} añade 750 recortes
+débiles por época a los 252 dorados. \emph{Preentreno + ajuste} entrena 30 épocas con débiles
+(1\,000 por época) y luego ajusta solo con dorados, partiendo de esos pesos. Muestrear los débiles
+en cada época mantiene un costo de minutos por corrida; a lo largo del entrenamiento cada
+recorte débil se ve varias veces.
+
+\begin{table}[t]
+\centering
+\caption{Ablación (a) en valid: media $\pm$ desviación sobre 3 semillas.}
+\label{tab:ablacion_a}
+\begin{tabular}{lccc}
+\toprule
+Estrategia & IoU & Precisión & Recall \\
+\midrule
+Otsu (referencia)        & 0.507                    & 0.634  & 0.716 \\
+Solo débiles             & $0.562\pm0.009$          & 0.731 & 0.709 \\
+Mezcla dorados + débiles & $0.571\pm0.004$          & 0.751 & 0.706 \\
+Preentreno + ajuste      & $0.641\pm0.005$          & 0.823 & 0.744 \\
+\textbf{Solo dorados}    & $\mathbf{0.644\pm0.002}$ & 0.822 & 0.749 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tres observaciones. Primera: la red entrenada \emph{solo} con etiquetas de Otsu supera a su
+propio maestro (0.562 frente a 0.507). Al aprender un mapeo suave con contexto espacial
+promedia parte del ruido de un umbral aplicado píxel a píxel. Segunda: mezclar débiles con
+dorados \emph{empeora} el modelo ($-0.073$). Los débiles son tres veces más numerosos en cada
+época y dominan el gradiente, de modo que la red hereda los errores sistemáticos de Otsu, en
+especial la comisión en zonas áridas. Las cifras lo confirman: el recall apenas cambia entre
+variantes (0.71--0.75), pero la comisión pasa de 0.178 con solo dorados a 0.249 con la mezcla y
+a 0.269 con solo débiles. Tercera: preentrenar con débiles y ajustar con dorados
+recupera el desempeño, pero queda empatado con usar solo dorados (la diferencia, $0.003$, es
+menor que la desviación). Las etiquetas débiles no aportan información nueva: se derivan del
+mismo SAR que ya ve la red, con una regla que la red supera. El modelo final usa, por tanto,
+\textbf{solo los dorados con la pérdida combinada}.

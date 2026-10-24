@@ -1,0 +1,78 @@
+% =====================================================================
+% V-F. Fusión con Sentinel-2 (bono, E6)
+% Fuente: resultados/f10_resumen.csv y f10_deltas.csv
+% =====================================================================
+\subsection{Fusión con Sentinel-2 (bono)}
+\label{sec:fusion}
+
+Añadimos a la misma U-Net seis bandas de Sentinel-2 del mismo evento: B2, B3 y B4 (visible), B8
+(NIR), y B11 y B12 (SWIR). Se concatenan a VV y VH como canales de entrada, lo que se conoce como
+fusión temprana. El agua absorbe casi toda la energía en NIR y SWIR, y con esas bandas la red
+tiene la información de los índices clásicos NDWI y MNDWI. Comparamos tres modos con el
+protocolo de siempre (3 semillas, pérdida combinada, selección en valid): solo SAR, solo óptico
+y fusión. Para que la comparación sea justa, los tres usan la \emph{misma máscara}: se ignora
+todo píxel con SAR u óptico inválido, y por eso el modo SAR se volvió a entrenar. Su IoU en test
+(0.662) es consistente con el de la Sección~\ref{sec:test}.
+
+\begin{table}[t]
+\centering
+\caption{Fusión con Sentinel-2: IoU (media $\pm$ desviación, 3 semillas) y precisión/recall en
+test.}
+\label{tab:fusion}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lccccc}
+\toprule
+Entrada & Valid & Test & Bolivia & P\textsubscript{test} & R\textsubscript{test} \\
+\midrule
+SAR (2)       & $0.635\pm.007$ & $0.662\pm.012$ & $0.656\pm.016$ & 0.810 & 0.784 \\
+Óptico (6)    & $0.813\pm.022$ & $0.841\pm.011$ & $0.783\pm.014$ & 0.910 & 0.917 \\
+\textbf{Fusión (8)} & $\mathbf{0.833\pm.007}$ & $\mathbf{0.848\pm.009}$ & $0.783\pm.008$ & 0.937 & 0.899 \\
+\midrule
+$\Delta$ fusión $-$ SAR & $+0.198$ & $+0.185$ & $+0.127$ & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{f10_barras_iou.png}
+\caption{IoU por modo de entrada y partición; los puntos son las semillas y las líneas
+punteadas, Otsu.}
+\label{fig:fusion_barras}
+\end{figure}
+
+\textbf{Cambio de IoU.} La fusión sube el IoU de test en $+0.185\pm0.004$ respecto al SAR, con el
+mismo signo en las tres semillas, cuando se comparan corridas con la misma semilla
+(Tabla~\ref{tab:fusion}, Fig.~\ref{fig:fusion_barras}). La ganancia se mantiene en el evento no
+visto de Bolivia ($+0.127$).
+
+\textbf{¿De dónde viene la ganancia?} Casi toda viene del óptico por sí solo, que ya alcanza
+0.841 en test. Frente al óptico, la fusión gana apenas $+0.007$ en test y nada en Bolivia,
+diferencias dentro de la variación entre semillas. El SAR aporta otras cosas: \emph{precisión}
+(la comisión en test baja de 0.090 a 0.063, y en Bolivia la precisión sube de 0.865 a 0.915) y
+\emph{estabilidad} (la desviación en valid baja de 0.022 a 0.007). Nuestro modelo solo óptico es
+comparable con Prithvi~\cite{jakubik2023prithvi}, un modelo fundacional que, ajustado en
+Sen1Floods11 con estas mismas seis bandas, reporta un IoU de agua de 0.805 en test y 0.780 en
+Bolivia~\cite{ibmnasa2023prithvisen1floods11}.
+
+\textbf{Dónde ayuda.} La fusión corrige precisamente los fallos de la Sección~\ref{sec:fallos}
+(Fig.~\ref{fig:fusion_casos}). En Pakistan\_70625, los FP de las parcelas secas desaparecen y el
+IoU del recorte pasa de 0.58 a 0.81, porque en el óptico un campo seco no se parece al agua. En
+Pakistan\_849790, el agua no especular empieza a detectarse (0.07 a 0.28), aunque sigue habiendo
+mucha omisión. En Bolivia\_314919 se reducen las omisiones de los bordes.
+
+\textbf{Cautela.} Este resultado no significa que el óptico sustituya al SAR. Las etiquetas de
+Sen1Floods11 se trazaron mirando ese mismo Sentinel-2, así que el óptico tiene una ventaja
+estructural frente a la etiqueta. Además, los etiquetadores excluyeron lo nublado: dentro de los
+píxeles etiquetados, menos del 0.3\,\% tiene aspecto de nube, de modo que el óptico solo se
+evalúa donde se ve. En una inundación real las nubes coinciden con el evento, y ahí el SAR es
+la única fuente. La fusión es un complemento valioso cuando hay una imagen óptica despejada y
+cercana en el tiempo, no un reemplazo.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.62\textwidth]{f10_comparacion_casos.png}
+\caption{SAR frente a fusión en los casos de la Sección~\ref{sec:fallos}: VH, Sentinel-2 en
+color real, errores con solo SAR y errores con la fusión (IoU del recorte en el título).}
+\label{fig:fusion_casos}
+\end{figure*}

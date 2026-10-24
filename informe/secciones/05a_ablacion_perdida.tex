@@ -1,0 +1,56 @@
+% =====================================================================
+% V-A. Ablación (b): función de pérdida y conexiones de salto  (E2b)
+% Fuente: resultados/f6b_ablacion_resumen.csv
+% =====================================================================
+
+\subsection{Ablación (b): función de pérdida y conexiones de salto}
+\label{sec:ablacion_perdida}
+
+Entrenamos cuatro variantes con solo los recortes dorados (Tabla~\ref{tab:ablacion_b},
+Fig.~\ref{fig:ablacion_b}). Tres cambian únicamente la pérdida; la cuarta usa BCE y elimina las
+conexiones de salto, de modo que el decodificador reconstruye la máscara solo desde el cuello de
+botella.
+
+\begin{table}[t]
+\centering
+\caption{Ablación (b) en valid: media $\pm$ desviación sobre 3 semillas.}
+\label{tab:ablacion_b}
+\begin{tabular}{llccc}
+\toprule
+Variante & Saltos & IoU & Precisión & Recall \\
+\midrule
+Otsu (referencia)  & ---   & 0.507             & 0.634  & 0.716 \\
+BCE                & sí    & $0.621\pm0.002$   & 0.844  & 0.702 \\
+Dice               & sí    & $0.634\pm0.009$   & 0.800  & 0.753 \\
+\textbf{BCE + Dice}& sí    & $\mathbf{0.644\pm0.002}$ & 0.822  & 0.749 \\
+BCE                & no    & $0.584\pm0.007$   & 0.773  & 0.706 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{f6b_ablacion.png}
+\caption{Ablación (b): IoU de valid por variante; cada punto es una semilla y la línea
+punteada es Otsu.}
+\label{fig:ablacion_b}
+\end{figure}
+
+\textbf{Pérdida.} Con BCE la red es conservadora: alta precisión (0.844) pero recall de 0.702.
+Es lo esperado con 9.4\,\% de agua, porque declarar ``no agua'' en caso de duda casi no se
+penaliza. El Dice, que solo mira el solapamiento de la clase agua, invierte ese balance (recall
+$+0.051$, precisión $-0.044$) y sube el IoU, pero con una variación entre semillas cuatro veces
+mayor, consistente con sus gradientes más ruidosos. La combinación obtiene el mejor IoU
+($0.644$) con la estabilidad de la BCE: conserva casi todo el recall del Dice (0.749) y recupera
+parte de la precisión (0.822). La mejora sobre BCE ($+0.023$) es unas diez veces su
+desviación, por lo que no se explica por el azar de la semilla. Es la pérdida que usamos en el
+resto del trabajo.
+
+\textbf{Conexiones de salto.} Quitarlas baja el IoU de $0.621$ a $0.584$ con la misma pérdida
+($-0.037$, unas cinco desviaciones). En el agregado la pérdida es sobre todo de precisión
+(0.844 a 0.773; la comisión sube de 0.156 a 0.227): sin el detalle fino, los bordes del agua se
+``derraman'' sobre el fondo. La caída tampoco es uniforme: se concentra en los eventos con
+ríos angostos y bordes finos (Estados Unidos $-0.10$, España $-0.08$ de IoU). Tras cuatro
+reducciones, un río de pocos píxeles de ancho ya no existe en el cuello de botella; los saltos
+devuelven al decodificador ese detalle espacial de alta resolución, que es justo la motivación
+original de la U-Net~\cite{ronneberger2015unet}.

@@ -1,0 +1,62 @@
+# =====================================================================
+# .gitignore — mapeo-inundaciones-sar-unet
+# Se versiona: src/, notebooks/, resultados (CSV/JSON), figuras (PNG), informe (LaTeX), README.
+# NO se versiona: datos satelitales, pesos de modelos, archivos temporales y credenciales.
+# =====================================================================
+
+# --- Datos (se descargan con los cuadernos: Sen1Floods11, Earth Engine, Copernicus EMS) ---
+datos_sen1floods11/
+datos_lima/
+*.tif
+*.tiff
+*.gdb/
+*.gpkg
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+
+# --- Pesos y checkpoints (pesan decenas de MB; se regeneran entrenando) ---
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+# --- Paquetes descargados de Kaggle/Colab ---
+*.zip
+
+# --- Logs de los procesos por GPU ---
+resultados/logs_*/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+
+# --- Credenciales (Earth Engine / Google Cloud / Kaggle) ---
+.config/
+credentials*
+*.json.key
+kaggle.json
+
+# --- LaTeX (archivos auxiliares de compilación) ---
+informe/*.aux
+informe/*.bbl
+informe/*.blg
+informe/*.log
+informe/*.out
+informe/*.fls
+informe/*.fdb_latexmk
+informe/*.synctex.gz
+informe/*.toc
+
+# --- Sistema operativo / editores ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

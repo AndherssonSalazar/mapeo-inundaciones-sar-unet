@@ -1,0 +1,106 @@
+% =====================================================================
+% V-E. Análisis cualitativo de fallos  (E5)
+% Fuente: resultados/f9_resumen_fallos.csv y figuras f9_*
+% =====================================================================
+\subsection{Análisis cualitativo de fallos}
+\label{sec:fallos}
+
+Buscamos los fallos del SAR que explican los errores de test y de Lima. Para no quedarnos en la
+inspección visual, cada tipo de fallo se acompaña de una prueba cuantitativa independiente,
+calculada con capas auxiliares descargadas sobre la grilla exacta del recorte
+(Tabla~\ref{tab:fallos}). Para las pruebas espaciales usamos la \emph{razón de enriquecimiento}:
+el porcentaje de errores que cumple una condición dividido entre el porcentaje del área que la
+cumple. Si es mayor que 1, la condición concentra errores más de lo que su área explicaría.
+
+\begin{table}[t]
+\centering
+\caption{Tipos de fallo del SAR y su evidencia cuantitativa.}
+\label{tab:fallos}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.4cm}c>{\raggedright\arraybackslash}p{4.6cm}@{}}
+\toprule
+Fallo (recorte) & Error & Evidencia \\
+\midrule
+Sombra / incidencia rasante (Lima\_0104) & FP &
+  76.5\,\% de los FP con $\theta_{\text{local}}>60^\circ$ frente a 23.0\,\% del área
+  (razón 3.3) \\
+Doble rebote / lodo urbano (Lima\_0506) & FN &
+  $\Delta$VV (17/03 $-$ 05/03): $+1.22$\,dB en zona inundada frente a $+0.03$\,dB fuera \\
+Agua no especular (Pakistan\_849790) & FN &
+  VH de los FN $-18.1$\,dB, cerca del no agua ($-16.3$) y lejos del agua detectada
+  ($-24.9$) \\
+Agua no especular (Bolivia\_314919) & FN &
+  VH de los FN $-22.0$\,dB, intermedio entre agua ($-25.4$) y no agua ($-15.0$) \\
+Superficie seca y lisa (Pakistan\_70625) & FP &
+  VH de los FP $-24.9$\,dB, tan oscuro como el agua real ($-23.4$) \\
+\midrule
+\emph{Agua permanente (Lima\_0506)} & \emph{FP} &
+  \emph{Descartada:} 0\,\% de los FP con ocurrencia JRC $>50$\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{1) Sombra de radar e incidencia rasante (FP).} Con el relieve SRTM y la geometría de la
+pasada descendente calculamos el ángulo de incidencia local,
+$\cos\theta_{\text{local}}=\cos s\cos\theta+\sin s\sin\theta\cos(a-\phi)$, donde $s$ es la
+pendiente, $a$ la orientación de la ladera, $\theta$ el ángulo de incidencia y
+$\phi\approx103^\circ$ el azimut hacia el sensor. Las laderas que miran en sentido contrario al
+sensor reciben el pulso casi rasante y devuelven poca energía, igual que el agua. Los FP de la
+quebrada de Lima\_0104 se concentran ahí: su $\theta_{\text{local}}$ mediano es $66.9^\circ$,
+frente a $47.2^\circ$ en todo el recorte (Fig.~\ref{fig:caso1}).
+
+\textbf{2) Doble rebote y lodo en zona urbana (FN).} En Lima\_0506 la inundación del Rímac
+atraviesa zona urbana, y el modelo omite el 100\,\% de los píxeles inundados. La diferencia
+entre la imagen del evento y la de doce días antes muestra que esa franja se \emph{aclaró}
+(Fig.~\ref{fig:caso2}): es la firma del doble rebote y del barro rugoso. Esta es la causa
+principal del colapso en Lima: el agua estaba, pero no se veía oscura.
+
+\textbf{3) Agua no especular (FN).} En Pakistan\_849790 se omite el 84\,\% del agua. El Sentinel-2
+muestra agua de aspecto somero junto a vegetación (Fig.~\ref{fig:caso3}), pero su VH es casi igual al de la
+tierra: el viento, la vegetación emergente o la poca profundidad rompen la reflexión
+especular. Es el mecanismo detrás del peor evento de test (Pakistán, IoU 0.194). En Bolivia\_314919 el
+efecto es más leve y se limita a los bordes y zonas de transición.
+
+\textbf{4) Superficie seca y lisa (FP).} Es el error inverso. En Pakistan\_70625 las parcelas en
+barbecho o recién preparadas son tan lisas como el agua para la longitud de onda de banda C, y
+su VH es incluso más oscuro que el del agua real (Fig.~\ref{fig:caso4}). Con una sola fecha de
+SAR estos FP son físicamente indistinguibles del agua. No descartamos que una parte sea riego
+no etiquetado, lo que haría el error ambiguo entre modelo y etiqueta. El mismo mecanismo
+explica la mancha oscura de Lima\_0506, que ya era oscura antes del evento.
+
+\textbf{Hipótesis descartada.} Probamos si los FP de Lima eran agua permanente que EMSN038 no
+etiqueta como inundación. Con la ocurrencia de agua de JRC (1984--2021), ningún FP cae donde
+hubo agua más de la mitad del tiempo, así que la descartamos. Reportarla es parte del análisis:
+el patrón no se explica por una diferencia de convención de la etiqueta.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{f9_caso1_sombra.png}
+\caption{Caso 1 (Lima\_0104): VH, incidencia local, probabilidad de agua y errores. Los FP
+(rojo) coinciden con las laderas de incidencia rasante.}
+\label{fig:caso1}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{f9_caso2_urbano.png}
+\caption{Caso 2 (Lima\_0506): VV antes y durante, diferencia $\Delta$VV con el contorno de
+EMSN038 y errores. La zona inundada se aclara (rojo en $\Delta$VV) y se omite por completo.}
+\label{fig:caso2}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{f9_caso3_Pakistan_849790.png}
+\caption{Caso 3 (Pakistan\_849790): el agua visible en Sentinel-2 no es oscura en VH y se omite
+(naranja).}
+\label{fig:caso3}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{f9_caso4_arido.png}
+\caption{Caso 4 (Pakistan\_70625): parcelas secas y lisas tan oscuras como el agua generan FP
+(rojo).}
+\label{fig:caso4}
+\end{figure*}

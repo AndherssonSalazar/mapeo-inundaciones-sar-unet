@@ -1,0 +1,61 @@
+% =====================================================================
+% V-C. Evaluación en distribución (test)  (E3)
+% =====================================================================
+\subsection{Evaluación en distribución (test)}
+\label{sec:test}
+
+El modelo elegido en valid (pérdida combinada, solo dorados) se evaluó una única vez en test con
+sus tres semillas y umbral 0.5 (Tabla~\ref{tab:test}). Supera a Otsu en todas las métricas: el
+IoU sube de 0.554 a 0.669 ($+0.114$). La mejora viene sobre todo de la precisión ($+0.133$); el
+recall mejora menos ($+0.041$). Es decir, la red aprendió principalmente a \emph{no} confundir
+con agua superficies oscuras que un umbral sí confunde.
+
+\begin{table}[t]
+\centering
+\caption{Test (eventos vistos, recortes no vistos). U-Net: media $\pm$ desviación sobre 3
+semillas, umbral 0.5.}
+\label{tab:test}
+\begin{tabular}{lcc}
+\toprule
+Métrica & Otsu & U-Net (BCE + Dice) \\
+\midrule
+IoU       & 0.554 & $\mathbf{0.669\pm0.003}$ \\
+F1        & 0.713 & 0.801 \\
+Precisión & 0.682 & 0.815 \\
+Recall    & 0.748 & 0.789 \\
+Omisión   & 0.252 & 0.211 \\
+Comisión  & 0.318 & 0.185 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\columnwidth]{f7_matriz_confusion_test.png}
+\caption{Matriz de confusión en test (suma de las 3 semillas).}
+\label{fig:confusion}
+\end{figure}
+
+\textbf{Matriz de confusión (Fig.~\ref{fig:confusion}).} El error dominante es la
+\emph{omisión}: el 21.1\,\% del agua real se predice como no agua. En cambio, solo el 2.5\,\% del
+fondo se marca como agua. Esa tasa de comisión parece despreciable, pero como el fondo es mucho
+más abundante que el agua, equivale a 1.35\,M de píxeles, suficientes para limitar la
+precisión a 0.815. Leída por filas, la matriz dice que el modelo es confiable cuando afirma
+``no agua'' y que, cuando falla, lo hace sobre todo por \emph{no ver} agua que sí está.
+
+\textbf{Umbral.} La curva IoU--umbral es casi plana entre 0.2 y 0.8. El umbral óptimo en valid
+($\approx$0.34) da 0.666 en test, sin diferencia apreciable con 0.5, así que mantenemos el
+umbral fijado de antemano: las probabilidades de la red están bien separadas.
+
+\textbf{Por evento.} El promedio esconde mucha variación: Nigeria alcanza 0.887, mientras
+Pakistán cae a 0.194 con una omisión de 0.71. El agua perdida en Pakistán no es oscura en el
+SAR: es el caso de agua no especular que analizamos en la Sección~\ref{sec:fallos}. La
+Fig.~\ref{fig:errores_test} muestra mapas de error representativos.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{f7_mapas_error_test.png}
+\caption{Mapas de error en test. Azul: VP; rojo: FP (comisión); naranja: FN (omisión);
+blanco: sin dato.}
+\label{fig:errores_test}
+\end{figure}

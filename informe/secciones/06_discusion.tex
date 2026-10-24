@@ -1,0 +1,37 @@
+% =====================================================================
+% VI. Discusión crítica y limitaciones
+% =====================================================================
+\section{Discusión crítica y limitaciones}
+\label{sec:discusion}
+
+\textbf{La etiqueta define el techo.} Las etiquetas de Sen1Floods11 se trazaron con ayuda del
+Sentinel-2 del mismo día. Parte del agua etiquetada es, por tanto, agua que el óptico ve y el SAR
+no (Pakistán, Sección~\ref{sec:fallos}). Esto pone un techo al modelo solo SAR que ninguna
+arquitectura puede superar, y explica a la vez la gran ganancia de la fusión. Las cifras de E6
+miden ``qué tan bien se reproduce una etiqueta óptica'', no solo ``qué tan bien se detecta el
+agua''.
+
+\textbf{Lima no es un fracaso del entrenamiento, pero tampoco una prueba limpia.} La etiqueta
+EMSN038 es la máxima extensión delineada con imágenes ópticas de días posteriores, no el agua
+presente a la hora del paso del radar. Con un solo evento y 64 recortes con 1\,\% de agua, el IoU
+es además muy sensible. Lo que sí muestran los datos multitemporales es un límite físico: el
+agua urbana y de huaico se \emph{aclara}, y un modelo de una sola fecha que aprendió ``agua =
+oscuro'' no puede detectarla. La salida no es más datos del mismo tipo, sino otra información:
+una imagen previa para detectar cambios~\cite{bountos2024kurosiwo} o la coherencia
+interferométrica~\cite{zhao2022urbanaware}.
+
+\textbf{Tamaño de muestra y optimismo en distribución.} Entrenamos con 252 recortes y estimamos
+la variabilidad con solo tres semillas. Test proviene de los mismos eventos que train, y la
+autocorrelación espacial entre recortes cercanos hace esa cifra optimista. La evaluación en
+Bolivia (15 recortes) es la más honesta, pero también la más ruidosa ($\pm0.026$). El IoU
+agregado, a su vez, está dominado por los recortes con mucha agua y oculta la variación entre
+eventos (de 0.19 a 0.89).
+
+\textbf{Decisiones no exploradas.} Fijamos tasa de aprendizaje, profundidad, número de canales y
+umbral sin búsqueda de hiperparámetros, para no ajustar nada en función de test. No probamos
+ponderación de clases ni pérdida focal, aumentos radiométricos ni predicción con aumentos (TTA).
+Las rotaciones de 90$^\circ$ ignoran que la geometría de observación del SAR no es invariante a
+rotaciones (las sombras caen hacia el lado opuesto al sensor). En la ablación débil probamos una
+sola proporción de muestreo. Por último, las corridas en Kaggle usaron estadísticas de
+normalización redondeadas a tres decimales, una diferencia despreciable frente a la escala de
+los datos.

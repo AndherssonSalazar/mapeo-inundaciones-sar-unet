@@ -1,0 +1,7 @@
+particion,comparacion,Δiou media,Δiou desv.,mismo signo en todas las semillas
+bolivia,optico − sar,0.1273,0.0018,True
+test,optico − sar,0.1782,0.0081,True
+valid,optico − sar,0.1778,0.0152,True
+bolivia,sar_optico − sar,0.1267,0.0202,True
+test,sar_optico − sar,0.1853,0.0036,True
+valid,sar_optico − sar,0.1975,0.0021,True

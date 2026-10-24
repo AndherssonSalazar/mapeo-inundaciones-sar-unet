@@ -1,0 +1,7 @@
+caso,chip,error,evidencia
+1. Sombra / incidencia rasante,Lima_0104,FP,76.5% de los FP con θ_local>60° vs 23.0% del área (×3.33)
+2. Doble rebote / suelo saturado (urbano),Lima_0506,FN,ΔVV(17/03−05/03) inundado +1.22 dB vs no inundado +0.03 dB
+3. Vegetación inundada / agua no especular,Pakistan_849790,FN,VH mediano FN -18.1 dB vs VP -24.9 dB (no agua -16.3)
+3. Vegetación inundada / agua no especular,Bolivia_314919,FN,VH mediano FN -22.0 dB vs VP -25.4 dB (no agua -15.0)
+4. Superficie seca y lisa (árido),Pakistan_70625,FP,VH mediano FP -24.9 dB vs no agua correcto -17.7 dB
+5. Agua permanente (convención de etiqueta),Lima_0506,FP aparente,0.0% de los FP con ocurrencia JRC>50% vs 0.1% del área (×0.0)

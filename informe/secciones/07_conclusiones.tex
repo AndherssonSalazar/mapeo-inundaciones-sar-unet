@@ -1,0 +1,22 @@
+% =====================================================================
+% VII. Conclusiones
+% =====================================================================
+\section{Conclusiones}
+\label{sec:conclusiones}
+
+Una U-Net implementada desde cero con VV y VH supera al umbral de Otsu en Sen1Floods11 (IoU de
+test 0.669 frente a 0.554), sobre todo porque reduce las falsas alarmas. La pérdida combinada BCE
++ Dice y las conexiones de salto son las decisiones que más pesan. Las etiquetas débiles de Otsu
+no aportan, porque no contienen información que la red no extraiga del propio SAR.
+
+El modelo generaliza a un evento no visto con agua calma (Bolivia, brecha de 0.8\,\%), pero
+colapsa en Lima 2017. Allí el agua urbana y de huaico se aclara en el radar, las laderas en
+incidencia rasante imitan al agua y la etiqueta óptica describe la extensión máxima. El análisis
+de fallos confirma cuatro mecanismos físicos con pruebas cuantitativas y descarta un quinto.
+
+Añadir Sentinel-2 eleva el IoU de test a 0.848 ($+0.185$) y corrige justo esos fallos, pero la
+ganancia proviene casi por completo del óptico y está favorecida por cómo se etiquetaron los
+datos. Para un servicio operativo en el Perú, donde las inundaciones llegan con nubes, el
+siguiente paso es dar al modelo una dimensión temporal: una imagen SAR previa al evento para
+detectar cambios, y la coherencia interferométrica para el agua urbana. Lima es el caso de
+prueba natural para ambos.

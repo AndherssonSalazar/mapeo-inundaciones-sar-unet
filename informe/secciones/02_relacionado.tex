@@ -1,0 +1,38 @@
+% =====================================================================
+% II. Trabajo relacionado  (~0.75 páginas)
+% =====================================================================
+\section{Trabajo relacionado}
+\label{sec:relacionado}
+
+\textbf{Redes convolucionales frente a reglas.} Los servicios operativos de mapeo con SAR se
+basan en umbrales sobre la retrodispersión, a menudo refinados con información auxiliar.
+Bereczky \emph{et al.}~\cite{bereczky2022benchmarking} compararon varias CNN con una cadena
+operativa basada en reglas sobre Sentinel-1 y encontraron que las redes son competitivas con
+ella. Lee y Li~\cite{lee2025geoai} revisan la evolución del área, desde los umbrales hasta las
+CNN tipo codificador--decodificador y los modelos fundacionales.
+
+\textbf{Conjuntos de datos.} Sen1Floods11~\cite{bonafilia2020sen1floods11} ofrece 446 recortes
+etiquetados a mano de 11 eventos y miles de recortes con etiquetas automáticas obtenidas por
+umbral, lo que permite estudiar el valor de la supervisión débil. Le siguieron conjuntos más
+grandes y multimodales: MMFlood~\cite{montello2022mmflood} añade relieve e hidrografía a
+Sentinel-1; S1S2-Water~\cite{wieland2024s1s2water} empareja Sentinel-1 y Sentinel-2 a escala
+global; y Kuro Siwo~\cite{bountos2024kurosiwo} incluye imágenes SAR \emph{antes} del evento, con
+el argumento de que la comparación temporal resuelve ambigüedades que una sola fecha no puede.
+
+\textbf{Inundación urbana.} En ciudades el agua no siempre se oscurece: entre edificios aparece
+el doble rebote (fachada--agua--sensor), que la \emph{aclara}. Zhao \emph{et
+al.}~\cite{zhao2022urbanaware} lo abordan con una U-Net consciente de lo urbano que combina
+intensidad multitemporal y coherencia interferométrica. Con intensidad de una sola fecha, como
+en este trabajo, esa información no está disponible.
+
+\textbf{Fusión SAR--óptico y modelos fundacionales.} OmbriaNet~\cite{drakonakis2022ombrianet}
+fusiona series temporales de Sentinel-1 y Sentinel-2 en una CNN supervisada para mapear
+inundaciones.
+El modelo fundacional Prithvi~\cite{jakubik2023prithvi}, preentrenado en imágenes ópticas, se
+ajusta en Sen1Floods11 con seis bandas de Sentinel-2 y alcanza un IoU de agua cercano a 0.8.
+
+\textbf{Brecha que aborda este trabajo.} La mayoría de estos estudios reporta el desempeño en
+distribución. Aquí evaluamos además la transferencia a un evento peruano con etiquetas de un
+producto operativo (Copernicus EMS) y explicamos el fallo con mediciones físicas, no solo con la
+métrica. También cuantificamos, con el mismo protocolo, cuánto de la ganancia de la fusión se
+debe al óptico por sí solo.

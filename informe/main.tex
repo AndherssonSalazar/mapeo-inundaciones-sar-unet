@@ -1,0 +1,145 @@
+% =====================================================================
+% Informe — Pregunta 2: Mapeo de inundaciones con Sentinel-1 y U-Net
+% Curso: Redes Neuronales y Aprendizaje Profundo — Maestría en IA, UNI
+% Plantilla: IEEEtran (conference). Objetivo: 8 páginas (rango permitido 6–10).
+% Las figuras van en la carpeta figuras/ del proyecto de Overleaf.
+% =====================================================================
+\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands,es-tabla]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{siunitx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{cite}
+\graphicspath{{figuras/}}
+\sisetup{output-decimal-marker={.}, separate-uncertainty=true}
+
+% Marca de pendiente: se borra cuando la sección esté escrita
+\newcommand{\pendiente}[1]{\textcolor{red}{[Pendiente: #1]}}
+
+% \seccion{archivo}{contenido provisional}: si existe secciones/archivo.tex lo incluye;
+% si todavía no existe, muestra el contenido provisional. Así cada sección nueva solo se
+% sube como archivo, sin volver a tocar este main.tex.
+\newcommand{\seccion}[2]{\IfFileExists{secciones/#1.tex}{\input{secciones/#1}}{#2}}
+
+\begin{document}
+
+\title{Mapeo de inundaciones con Sentinel-1 y una U-Net:\\
+ablaciones, generalización a Lima y fusión con Sentinel-2}
+
+\author{%
+\IEEEauthorblockN{Andhersson M. Salazar F.\IEEEauthorrefmark{1},
+Alexander A. Chavez C.\IEEEauthorrefmark{2},
+Alex R. Pomazón S.\IEEEauthorrefmark{3} y
+Christian A. Urviola G.\IEEEauthorrefmark{4}}
+\IEEEauthorblockA{Maestría de Especialización en Inteligencia Artificial\\
+Universidad Nacional de Ingeniería, Lima, Perú\\
+\IEEEauthorrefmark{1}andhersson.salazar.f@uni.pe, ORCID: 0009-0006-4517-5666\\
+\IEEEauthorrefmark{2}alexander.chavez.c@uni.pe, ORCID: 0009-0000-0956-9082\\
+\IEEEauthorrefmark{3}alex.pomazon.s@uni.pe, ORCID: 0009-0004-8514-1546\\
+\IEEEauthorrefmark{4}christian.urviola.g@uni.pe, ORCID: 0000-0003-4621-7128}}
+
+\maketitle
+
+% ---------------------------------------------------------------------
+\begin{abstract}
+El radar de apertura sintética (SAR) de Sentinel-1 permite mapear inundaciones bajo nubes,
+pero su principio físico (el agua calma se ve oscura) tiene excepciones. Entrenamos una U-Net
+implementada desde cero con las polarizaciones VV y VH sobre Sen1Floods11 y la evaluamos con un
+protocolo de tres semillas. La pérdida combinada BCE + Dice y las conexiones de salto son las
+decisiones más influyentes, mientras que las etiquetas débiles de Otsu no mejoran al modelo. En
+test el modelo alcanza un IoU de agua de 0.669, frente a 0.554 de Otsu, y se mantiene en el
+evento no visto de Bolivia (0.663). En cambio, colapsa en la inundación de Lima de marzo de 2017
+(IoU 0.003). Con imágenes antes y después del evento mostramos que allí el agua urbana y de
+huaico \emph{se aclara} en el radar. Un análisis de fallos confirma con pruebas cuantitativas
+cuatro mecanismos (incidencia rasante, doble rebote, agua no especular y superficies secas
+lisas) y descarta un quinto. Finalmente, fusionar seis bandas de Sentinel-2 eleva el IoU de test
+a 0.848, aunque la ganancia proviene casi por completo del óptico y está favorecida por cómo se
+etiquetaron los datos.
+\end{abstract}
+
+\begin{IEEEkeywords}
+SAR, Sentinel-1, segmentación semántica, U-Net, inundaciones, Sen1Floods11, generalización geográfica
+\end{IEEEkeywords}
+
+% ---------------------------------------------------------------------
+% Extensión final: ~10 páginas con figuras (límite permitido: 10).
+% ---------------------------------------------------------------------
+
+\seccion{01_introduccion}{%
+\section{Introducción}
+\label{sec:introduccion}
+\pendiente{motivación: Niño Costero 2017 en Lima; el SAR ve a través de nubes y de noche;
+el agua calma se ve oscura (reflexión especular); objetivo y contribuciones (E1--E6)}}
+
+\seccion{02_relacionado}{%
+\section{Trabajo relacionado}
+\label{sec:relacionado}
+\pendiente{U-Net y CNN sobre S1 frente a umbrales; conjuntos de datos; inundación urbana;
+fusión S1+S2; modelos fundacionales; carencias que motivan este trabajo}}
+
+\seccion{03_datos}{%
+\section{Datos}
+\label{sec:datos}
+\pendiente{Sen1Floods11 (dorados, débiles, particiones); Lima: S1 del 17/03/2017 y EMSN038;
+preprocesamiento y desbalance (9.4\,\% de agua)}}
+
+\seccion{04_metodologia}{%
+\section{Metodología}
+\label{sec:metodologia}
+\pendiente{arquitectura (E1), pérdidas, métricas agregadas, entrenamiento, protocolo
+(3 semillas, selección en valid, test intacto)}}
+
+\section{Experimentos y resultados}
+\label{sec:resultados}
+
+\seccion{05a_ablacion_perdida}{%
+\subsection{Ablación (b): función de pérdida y conexiones de salto}
+\pendiente{E2(b)}}
+
+\seccion{05b_ablacion_debiles}{%
+\subsection{Ablación (a): etiquetas débiles}
+\pendiente{E2(a)}}
+
+\seccion{05c_test}{%
+\subsection{Evaluación en distribución (test)}
+\pendiente{E3}}
+
+\seccion{05d_generalizacion}{%
+\subsection{Generalización geográfica: Bolivia y Lima}
+\pendiente{E4}}
+
+\seccion{05e_fallos}{%
+\subsection{Análisis cualitativo de fallos}
+\pendiente{E5}}
+
+\seccion{05f_fusion}{%
+\subsection{Fusión con Sentinel-2 (bono)}
+\pendiente{E6}}
+
+\seccion{06_discusion}{%
+\section{Discusión crítica y limitaciones}
+\label{sec:discusion}
+\pendiente{sesgo de las etiquetas hacia el óptico; Lima: etiqueta de huella máxima vs.\ SAR;
+una sola fecha; tamaño de muestra; decisiones no exploradas}}
+
+\seccion{07_conclusiones}{%
+\section{Conclusiones}
+\label{sec:conclusiones}
+\pendiente{3--4 conclusiones y trabajo futuro (detección de cambios, multitemporal)}}
+
+\section*{Disponibilidad del código}
+El código (módulos \texttt{src/}, cuadernos por fase y resultados en CSV) está disponible en el
+repositorio público del proyecto en GitHub.
+% Enlace al repositorio: reemplazar USUARIO/REPOSITORIO y quitar el % de la línea siguiente.
+\url{https://github.com/AndherssonSalazar/mapeo-inundaciones-sar-unet.git}
+
+\bibliographystyle{IEEEtran}
+\bibliography{referencias}
+
+\end{document}

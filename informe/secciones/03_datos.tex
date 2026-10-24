@@ -1,0 +1,59 @@
+% =====================================================================
+% III. Datos  (~0.75 páginas)
+% =====================================================================
+\section{Datos}
+\label{sec:datos}
+
+\subsection{Sen1Floods11}
+Usamos los 446 recortes etiquetados a mano (\emph{dorados}) de
+Sen1Floods11~\cite{bonafilia2020sen1floods11}: imágenes Sentinel-1 GRD de $512\times512$
+píxeles ($\approx$10\,m) con las polarizaciones VV y VH en dB, y una máscara con tres valores:
+agua (1), no agua (0) y sin dato ($-1$). Respetamos las particiones oficiales
+(Tabla~\ref{tab:particiones}): train, valid y test provienen de los mismos 10 eventos, mientras
+que Bolivia es un evento completo que nunca se ve en entrenamiento.
+
+\begin{table}[t]
+\centering
+\caption{Particiones usadas. El agua se mide sobre píxeles válidos.}
+\label{tab:particiones}
+\begin{tabular}{lrl}
+\toprule
+Partición & Recortes & Uso \\
+\midrule
+train   & 252 & entrenamiento (9.4\,\% de agua) \\
+valid   &  89 & selección de modelo y de variantes \\
+test    &  90 & evaluación final en distribución (E3) \\
+Bolivia &  15 & evento no visto (E4) \\
+Lima    &  64 & evento peruano no visto (E4) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Para la ablación de supervisión débil usamos además los recortes \emph{débiles} del conjunto,
+cuyas etiquetas se obtuvieron con el umbral de Otsu sobre el propio SAR. Excluimos los de
+Bolivia y los que coinciden con un recorte dorado, para evitar fuga de información. Comparada
+con la etiqueta a mano en los recortes dorados, esa etiqueta automática solo alcanza un IoU de
+0.495, con mucha comisión en zonas áridas (Somalia, Pakistán): es una supervisión
+barata pero ruidosa.
+
+\subsection{Evento de Lima (marzo de 2017)}
+Construimos un conjunto de evaluación propio con la misma grilla que Sen1Floods11. La imagen es
+la escena Sentinel-1B del 17/03/2017 (10:38 UTC, órbita descendente relativa 171, VV+VH),
+obtenida ya calibrada y ortorrectificada desde Google Earth Engine. Las pasadas ascendentes
+sobre Lima solo traen VV, por lo que no sirven para un modelo de dos canales. La etiqueta es la
+capa de máxima extensión potencial de la inundación del producto EMSN038 de Copernicus EMS
+(13.58\,km$^2$), delineada con imágenes ópticas WorldView-2 del 18 y 21 de marzo. Solo se
+evalúa dentro del área cubierta por esas imágenes (1\,326\,km$^2$). Los cauces de los ríos Rímac
+y Chillón que quedan fuera de la inundación se marcan como $-1$, porque son agua permanente que
+la etiqueta no considera inundación. Resultan 64 recortes con solo 1.05\,\% de agua. En 15 de
+ellos hay píxeles con VV = VH = 0\,dB fuera de la franja del satélite; se marcan como $-1$ al
+leer.
+
+\subsection{Preprocesamiento}
+Cada banda se recorta a sus percentiles 1 y 99 y se estandariza con media y desviación
+calculadas \emph{solo en train} (VV: $-10.42\pm4.08$\,dB; VH: $-17.27\pm4.79$\,dB). Los píxeles
+SAR no finitos ($\approx$2.5\,M en train) pasan a 0 en la entrada y a $-1$ en la etiqueta, de
+modo que ni se aprenden ni se evalúan. En entrenamiento se toman recortes aleatorios de
+$256\times256$ con volteos y rotaciones de 90$^\circ$. Estas transformaciones no interpolan, así
+que la máscara conserva sus tres valores. Valid, test y las regiones externas se evalúan con el
+recorte completo de $512\times512$, sin aumentos.
