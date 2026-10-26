@@ -25,7 +25,7 @@ RAPIDO = os.environ.get("RNAP_RAPIDO") == "1"
 EN_KAGGLE = Path("/kaggle").exists()
 
 # Repositorio de GitHub (para descargar los recortes de Lima publicados en el release)
-REPOSITORIO = os.environ.get("RNAP_REPOSITORIO", "USUARIO/mapeo-inundaciones-sar-unet")
+REPOSITORIO = os.environ.get("RNAP_REPOSITORIO", "AndherssonSalazar/mapeo-inundaciones-sar-unet")
 VERSION = os.environ.get("RNAP_VERSION", "entrega-final")
 URL_DATOS_LIMA = f"https://github.com/{REPOSITORIO}/releases/download/{VERSION}/datos_lima.zip"
 
