@@ -1,0 +1,10 @@
+# PyTorch (torch) ya viene instalado en Kaggle y Colab; fuera de ellos, instalar la versión con CUDA
+# de https://pytorch.org antes de correr run_all.sh.
+torch>=2.1
+numpy
+pandas
+matplotlib
+tqdm
+rasterio
+scikit-image
+google-cloud-storage
